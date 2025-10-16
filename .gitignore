@@ -1,3 +1,4 @@
 *.csv
 250930 SciML Workshop/*
 _Ignore/*
+__pycache__/
