@@ -2,3 +2,6 @@
 250930 SciML Workshop/*
 _Ignore/*
 __pycache__/
+patch.patch
+apply.py
+results/*
