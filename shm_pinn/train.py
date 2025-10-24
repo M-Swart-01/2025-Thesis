@@ -10,7 +10,7 @@ def ddt(x, t):      # first derivative of x wrt t, returns gradient, creates gra
 def d2dt2(x, t):    # second derivative of x wrt t (repeat ddt())
     return ddt(ddt(x, t), t)
 
-_MSE = nn.MSELoss() #!!!!!!!!!!!!!!!! why "_"
+_MSE = nn.MSELoss() 
 
 # function - sample times for physics loss
 def sample_times(cfg, device, dtype):
@@ -39,9 +39,8 @@ def data_loss(net, t_data, x_data):
     return _MSE(net(t_data), x_data)
 
 # function - training loop
-
 def train(net, cfg, t_data, x_data, device, dtype):
-    opt = torch.optim.Adam(net.parameters(), lr=cfg.lr)                 # !!!! Optimiser - make configurable?
+    opt = torch.optim.Adam(net.parameters(), lr=cfg.lr)
 
     curve_total, curve_phys, curve_ic, curve_data = [], [], [], []
     t0 = time.time()  # start timer
@@ -58,9 +57,9 @@ def train(net, cfg, t_data, x_data, device, dtype):
         w_ic   = getattr(cfg, "w_ic", 0.0)
         w_data = getattr(cfg, "w_data", 1.0)
         
-        loss = w_phys*l_phys + w_ic*l_ic + w_data*l_data # total loss
+        loss = w_phys*l_phys + w_ic*l_ic + w_data*l_data 
 
-        loss.backward(); opt.step() # backprop using previously defined optimiser
+        loss.backward(); opt.step()
         
         # logging
         curve_total.append(loss.item())
@@ -70,11 +69,12 @@ def train(net, cfg, t_data, x_data, device, dtype):
 
 
         if step % cfg.print_every == 0:
-            print(f"[{step:4d}] total={loss.item():.3e} phys={l_phys.item():.3e} ic={l_ic.item():.3e} data={l_data.item():.3e}")
+            print(f"[{step:4d}] total={loss.item():.3e} phys={l_phys.item():.3e} ic={l_ic.item():.3e} data={l_data.item():.3e} current time={time.time()-t0:.1f}s")
         # End stats
         train_seconds = (time.time() - t0)
         stats = {
             "final_total": curve_total[-1],
+            "final_L2"
             "final_phys":  curve_phys[-1],
             "final_ic":    curve_ic[-1],
             "final_data":  curve_data[-1],

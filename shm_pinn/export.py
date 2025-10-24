@@ -1,6 +1,3 @@
-"""
-Export module for saving results to timestamped folders.
-"""
 import os
 import shutil
 from datetime import datetime
@@ -10,15 +7,11 @@ import matplotlib.pyplot as plt
 
 
 def create_results_folder():
-    """
-    Create a timestamped folder for results.
-    Returns the folder path and timestamp.
-    """
-    # Create main results directory if it doesn't exist
+    # main directory
     base_dir = os.path.join(os.path.dirname(__file__), '..', 'results')
     os.makedirs(base_dir, exist_ok=True)
     
-    # Create timestamped subfolder
+    # timestamped subfolder
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_folder = os.path.join(base_dir, timestamp)
     os.makedirs(results_folder, exist_ok=True)
@@ -28,44 +21,25 @@ def create_results_folder():
 
 
 def save_config_to_excel(cfg, filepath):
-    """
-    Save config variables and values to Excel.
-    
-    Args:
-        cfg: Config object
-        filepath: Full path to save the Excel file
-    """
-    # Convert config to dictionary
     config_dict = asdict(cfg)
-    
-    # Create DataFrame
     df = pd.DataFrame(list(config_dict.items()), columns=['Variable', 'Value'])
-    
-    # Save to Excel
     df.to_excel(filepath, index=False, sheet_name='Config')
     print(f"Config saved to: {filepath}")
 
 
 def save_stats_to_excel(stats, filepath):
-    """
-    Save training statistics to Excel.
-    
-    Args:
-        stats: Dictionary containing training statistics
-        filepath: Full path to save the Excel file
-    """
-    # Create Excel writer
     with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
         # Sheet 1: Summary statistics
         summary_data = {
             'Metric': ['Final Total Loss', 'Final Physics Loss', 'Final IC Loss', 
-                      'Final Data Loss', 'Training Time (seconds)'],
+                      'Final Data Loss', 'Evaluation L2 Error', 'Training Time (seconds)'],
             'Value': [
-                stats['final_total'],
-                stats['final_phys'],
-                stats['final_ic'],
-                stats['final_data'],
-                stats['train_time_sec']
+                stats.get('final_total'),
+                stats.get('final_phys'),
+                stats.get('final_ic'),
+                stats.get('final_data'),
+                stats.get('l2_error'),
+                stats.get('train_time_sec')
             ]
         }
         df_summary = pd.DataFrame(summary_data)
@@ -86,34 +60,14 @@ def save_stats_to_excel(stats, filepath):
 
 
 def save_plot(fig, filepath):
-    """
-    Save matplotlib figure as PNG.
-    
-    Args:
-        fig: matplotlib figure object
-        filepath: Full path to save the PNG file
-    """
     fig.savefig(filepath, dpi=300, bbox_inches='tight')
     print(f"Plot saved to: {filepath}")
 
 
 def save_code_snapshot(timestamp, results_folder):
-    """
-    Save copies of all Python files needed to run main.py with timestamp suffix.
-    Creates a 'code_snapshot' subfolder to keep results organized.
-    
-    Args:
-        timestamp: Timestamp string (YYYYMMDD_HHMMSS)
-        results_folder: Path to the results folder
-    """
-    # Create code_snapshot subfolder
     snapshot_folder = os.path.join(results_folder, f'code_snapshot_{timestamp}')
     os.makedirs(snapshot_folder, exist_ok=True)
-    
-    # Get the shm_pinn directory path
     source_dir = os.path.dirname(__file__)
-    
-    # List of Python files to copy (all the module files)
     python_files = [
         '__init__.py',
         'main.py',
@@ -125,7 +79,6 @@ def save_code_snapshot(timestamp, results_folder):
         'export.py',
         'apply.py'
     ]
-    
     copied_files = []
     failed_files = []
     
@@ -149,32 +102,12 @@ def save_code_snapshot(timestamp, results_folder):
 
 
 def export_results(cfg, stats, fig):
-    """
-    Main export function to save all results.
-    
-    Args:
-        cfg: Config object
-        stats: Dictionary containing training statistics
-        fig: matplotlib figure object
-    
-    Returns:
-        str: Path to the results folder
-    """
-    # Create timestamped folder
     results_folder, timestamp = create_results_folder()
-    
-    # Save config to Excel
     config_path = os.path.join(results_folder, 'config.xlsx')
     save_config_to_excel(cfg, config_path)
-    
-    # Save snapshot of all code files with timestamp
     save_code_snapshot(timestamp, results_folder)
-    
-    # Save stats to Excel
     stats_path = os.path.join(results_folder, 'stats.xlsx')
     save_stats_to_excel(stats, stats_path)
-    
-    # Save plot as PNG
     plot_path = os.path.join(results_folder, 'plot.png')
     save_plot(fig, plot_path)
     

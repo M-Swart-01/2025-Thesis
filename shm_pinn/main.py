@@ -6,7 +6,7 @@ import evaluate
 import export
 from config import Config
 
-def to_dtype(s): return {"float32": torch.float32, "float64": torch.float64}[s] # !!!!!! def
+def to_dtype(s): return {"float32": torch.float32, "float64": torch.float64}[s] # not implemented in current study
 
 if __name__ == "__main__":
     cfg = Config()
@@ -14,22 +14,17 @@ if __name__ == "__main__":
     dtype  = to_dtype(cfg.dtype_str)
 
     # data generation
-    t_data, x_data, _ = data.data_gen(cfg, device, dtype) # !!!!!!! what is _ and what about X_clean
+    t_data, x_data, _ = data.data_gen(cfg, device, dtype) 
 
-    # compute hard ics here
-
-    # build and initialise model
+    # build and initialise 
     net = model.build_model(cfg)
 
     # train
     net, stats = train.train(net, cfg, t_data, x_data, device, dtype)
 
-    # evaluation / plotting
+    # evaluation 
     l2_error, fig = evaluate.evaluate_and_plot(net, cfg, t_data, x_data)
+    stats['l2_error'] = float(l2_error)
     
-    # export results to timestamped folder
-    if fig is not None:
-        results_folder = export.export_results(cfg, stats, fig)
-    else:
-        print("Warning: No figure to export. Results not saved.")
-    
+    # export results
+    results_folder = export.export_results(cfg, stats, fig)    
