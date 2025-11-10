@@ -5,3 +5,4 @@ __pycache__/
 patch.patch
 apply.py
 results/*
+.gitignore
